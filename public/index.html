@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Beyin Takımı Yayınları • PDF Satış</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="/assets/logo.jpg" alt="Beyin Takımı" />
+        <div>
+          <div class="t1">Beyin Takımı Yayınları</div>
+          <div class="t2">PDF Paketleri • Havale/EFT ile Satın Al</div>
+        </div>
+      </div>
+      <a class="btn secondary" href="/order.html">Sipariş Sorgula</a>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="hero">
+      <div class="hero-grid">
+        <div class="hero-left">
+          <h1>LGS Din Kültürü’nde<br/>Sadece Bu Çalışma Yeter!</h1>
+          <p>
+            PDF paketlerini tek tek seçebilir veya sepet yapıp <b>toplu ödeme</b> ile alabilirsin.
+            Ödeme onaylanınca indirme bağlantın otomatik açılır.
+          </p>
+          <div class="pills">
+            <div class="pill"><strong>✅</strong> Mobil uyumlu</div>
+            <div class="pill"><strong>✅</strong> Sepet + toplu ödeme</div>
+            <div class="pill"><strong>✅</strong> Onay sonrası indirme</div>
+          </div>
+
+          <div id="sellerBox" class="card" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="hero-right">
+          <img src="/assets/hero-1.jpg" alt="Beyin Takımı" />
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>PDF Paketleri</h2>
+        <div id="products" class="list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Sepet</h2>
+        <div id="cart" class="list"></div>
+
+        <div class="cart-total">
+          <div class="muted">Toplam</div>
+          <div><span class="badge"><span id="total">0</span> TL</span></div>
+        </div>
+
+        <h2 style="margin-top:14px;">Sipariş Oluştur</h2>
+        <p class="muted" style="margin:0 0 8px;">
+          Dekont yüklemek <b>opsiyonel</b>. İstersen daha hızlı onay için ekleyebilirsin.
+        </p>
+
+        <form id="orderForm" class="form" enctype="multipart/form-data">
+          <input name="fullName" placeholder="Ad Soyad" required />
+          <input name="phone" placeholder="Telefon" required />
+          <input class="full" name="email" placeholder="E-posta" type="email" required />
+          <textarea name="transferRef" placeholder="Havale açıklaması (opsiyonel) / Not"></textarea>
+          <input class="full" name="dekont" type="file" accept="image/*,application/pdf" />
+          <button class="btn full" type="submit">Siparişi Oluştur</button>
+        </form>
+
+        <pre id="orderMsg" class="msg" style="margin-top:10px;"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- WhatsApp hızlı iletişim -->
+  <a class="whatsapp" target="_blank"
+     href="https://wa.me/905353745862?text=Merhaba%2C%20PDF%20paketleri%20hakk%C4%B1nda%20bilgi%20alabilir%20miyim%3F">
+    WhatsApp
+    <small>Hızlı destek</small>
+  </a>
+
+  <script src="/app.js"></script>
+</body>
+</html>

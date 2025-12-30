@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Yönetim Paneli</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Yönetim Paneli</h1>
+    <p class="muted">Bu sayfa sadece admin girişine açıktır.</p>
+
+    <!-- PDF YÜKLE -->
+    <div class="box">
+      <h2>PDF Yükle (Ürün Ekle)</h2>
+      <form id="uploadForm" class="form" enctype="multipart/form-data">
+        <input name="title" placeholder="PDF Başlığı" required />
+        <input name="priceTRY" type="number" placeholder="Fiyat (TL)" required />
+        <input name="pdf" type="file" accept="application/pdf" required />
+        <button type="submit">Yükle</button>
+      </form>
+      <div id="uploadMsg" class="msg"></div>
+    </div>
+
+    <!-- ÜRÜNLER -->
+    <div class="box">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <h2 style="margin:0;">Ürünler</h2>
+        <button id="refreshProducts" class="secondary">Yenile</button>
+      </div>
+      <div id="productList" class="list small" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- SİPARİŞLER -->
+    <div class="box">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <h2 style="margin:0;">Siparişler</h2>
+        <button id="refreshOrders" class="secondary">Yenile</button>
+      </div>
+      <div class="muted" style="margin-top:8px;">
+        İpucu: Dekont yüklendiyse “Dekont” butonu görünür. Onaylayınca kullanıcı indirme açılır.
+      </div>
+      <div id="orderList" class="list small" style="margin-top:10px;"></div>
+      <div id="orderMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    async function fetchJSON(url, opts) {
+      const res = await fetch(url, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "İşlem başarısız");
+      return data;
+    }
+
+    // -------------------------
+    // PDF ÜRÜN YÜKLE
+    // -------------------------
+    $("uploadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      $("uploadMsg").textContent = "";
+
+      const fd = new FormData(e.target);
+
+      try {
+        const res = await fetch("/api/admin/products", { method: "POST", body: fd });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || "Yükleme başarısız");
+
+        $("uploadMsg").textContent = "✅ PDF yüklendi ve ürün eklendi.";
+        e.target.reset();
+
+        await loadProducts();
+      } catch (err) {
+        $("uploadMsg").textContent = "❌ " + err.message;
+      }
+    });
+
+    // -------------------------
+    // ÜRÜNLERİ LİSTELE / SİL
+    // -------------------------
+    async function loadProducts() {
+      const list = $("productList");
+      list.innerHTML = "Yükleniyor...";
+
+      try {
+        const items = await fetchJSON("/api/admin/products");
+
+        if (!items.length) {
+          list.innerHTML = "<div class='muted'>Ürün yok. Üstten PDF yükleyerek ekleyebilirsin.</div>";
+          return;
+        }
+
+        list.innerHTML = "";
+
+        for (const p of items) {
+          const row = document.createElement("div");
+          row.className = "item";
+          row.innerHTML = `
+            <div>
+              <b>${escapeHtml(p.title)}</b><br/>
+              <span class="badge">${p.priceTRY} TL</span>
+              <div class="muted" style="margin-top:4px;">ID: ${p.id}</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button class="danger" data-del="${p.id}">Sil</button>
+            </div>
+          `;
+          list.appendChild(row);
+        }
+
+        list.onclick = async (e) => {
+          const id = e.target.getAttribute("data-del");
+          if (!id) return;
+
+          if (!confirm("Bu ürünü silmek istiyor musun? (PDF dosyası da silinir)")) return;
+
+          try {
+            await fetchJSON("/api/admin/products/" + id, { method: "DELETE" });
+            await loadProducts();
+          } catch (err) {
+            alert("❌ " + err.message);
+          }
+        };
+      } catch (err) {
+        list.innerHTML = "<div class='muted'>❌ " + err.message + "</div>";
+      }
+    }
+
+    // -------------------------
+    // SİPARİŞLERİ LİSTELE / ONAYLA / DEKONT
+    // -------------------------
+    async function loadOrders() {
+      const list = $("orderList");
+      $("orderMsg").textContent = "";
+      list.innerHTML = "Yükleniyor...";
+
+      try {
+        const orders = await fetchJSON("/api/admin/orders");
+
+        if (!orders.length) {
+          list.innerHTML = "<div class='muted'>Sipariş yok.</div>";
+          return;
+        }
+
+        // yeni sipariş üstte
+        orders.sort((a,b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+
+        list.innerHTML = "";
+
+        for (const o of orders) {
+          const row = document.createElement("div");
+          row.className = "item";
+
+          const hasReceipt = !!o.receiptPath;
+
+          row.innerHTML = `
+            <div style="flex:1;">
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <b>${o.orderCode}</b>
+                <span class="badge">${o.status}</span>
+                <span class="badge">${o.totalTRY} TL</span>
+                <span class="badge">${(o.items?.length || 0)} ürün</span>
+              </div>
+
+              <div class="muted" style="margin-top:6px;">
+                <b>Müşteri:</b> ${escapeHtml(o.fullName || "-")}
+                • <b>Tel:</b> ${escapeHtml(o.phone || "-")}
+                • <b>Email:</b> ${escapeHtml(o.email || "-")}
+              </div>
+
+              ${o.transferRef ? `<div class="muted" style="margin-top:4px;"><b>Açıklama:</b> ${escapeHtml(o.transferRef)}</div>` : ""}
+
+              <div class="muted" style="margin-top:6px;">
+                <b>Ürünler:</b> ${(o.items || []).map(i => escapeHtml(i.title)).join(" • ")}
+              </div>
+
+              <div class="muted" style="margin-top:6px;">
+                <b>Oluşturma:</b> ${o.createdAt || "-"}
+                ${o.approvedAt ? ` • <b>Onay:</b> ${o.approvedAt}` : ""}
+              </div>
+            </div>
+
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              ${hasReceipt ? `
+                <a href="/api/admin/receipt/${o.orderCode}">
+                  <button class="secondary">Dekont</button>
+                </a>
+              ` : ""}
+
+              ${o.status !== "approved"
+                ? `<button data-approve="${o.orderCode}">Onayla</button>`
+                : `<span class="badge">Onaylandı</span>`
+              }
+            </div>
+          `;
+
+          list.appendChild(row);
+        }
+
+        list.onclick = async (e) => {
+          const code = e.target.getAttribute("data-approve");
+          if (!code) return;
+
+          if (!confirm(code + " siparişini onaylamak istiyor musun?")) return;
+
+          try {
+            await fetchJSON("/api/admin/approve", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderCode: code }),
+            });
+
+            $("orderMsg").textContent = "✅ Onaylandı: " + code;
+            await loadOrders();
+          } catch (err) {
+            alert("❌ " + err.message);
+          }
+        };
+      } catch (err) {
+        list.innerHTML = "<div class='muted'>❌ " + err.message + "</div>";
+      }
+    }
+
+    // küçük güvenlik: HTML escape
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    // butonlar
+    $("refreshProducts").onclick = loadProducts;
+    $("refreshOrders").onclick = loadOrders;
+
+    // ilk açılış
+    loadProducts();
+    loadOrders();
+  </script>
+</body>
+</html>

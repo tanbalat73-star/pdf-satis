@@ -1,0 +1,66 @@
+{
+  "products": [
+    {
+      "id": "1c9380c3-e994-4afd-94df-66bc3fbc535f",
+      "title": "ingilizce full özet",
+      "priceTRY": 110,
+      "filePath": "uploads\\1766734976962_ingilizce_full___zet.pdf",
+      "createdAt": "2025-12-26T07:42:57.082Z"
+    },
+    {
+      "id": "fa7d2f26-2614-44f1-a483-3a9fdfe84fe0",
+      "title": "lgs din kültürü full ö zet",
+      "priceTRY": 110,
+      "filePath": "uploads\\1766734991961_lgs_din_full___zet.pdf",
+      "createdAt": "2025-12-26T07:43:11.969Z"
+    }
+  ],
+  "orders": [
+    {
+      "orderId": "a1c6e6ce-3343-4576-8ab7-09467f16ad38",
+      "orderCode": "1EADED32",
+      "fullName": "cumali ömeroğlu",
+      "email": "salih@tanokullari.com",
+      "phone": "05555555555",
+      "transferRef": "",
+      "items": [
+        {
+          "id": "1c9380c3-e994-4afd-94df-66bc3fbc535f",
+          "title": "ingilizce full özet",
+          "priceTRY": 110
+        }
+      ],
+      "totalTRY": 110,
+      "status": "approved",
+      "downloadToken": "10d6ef62e279fe49a713c269b8b3739e24ea2d14b848750a",
+      "tokenExpiresAt": "2025-12-28T07:43:54.611Z",
+      "createdAt": "2025-12-26T07:43:32.478Z",
+      "approvedAt": "2025-12-26T07:43:54.611Z",
+      "receiptPath": null,
+      "receiptOriginalName": null
+    },
+    {
+      "orderId": "43b277a6-97bd-4868-95d6-dafdda294426",
+      "orderCode": "B95599C6",
+      "fullName": "cumali ömeroğlu",
+      "email": "salih@tanokullari.com",
+      "phone": "05555555555",
+      "transferRef": "",
+      "items": [
+        {
+          "id": "1c9380c3-e994-4afd-94df-66bc3fbc535f",
+          "title": "ingilizce full özet",
+          "priceTRY": 110
+        }
+      ],
+      "totalTRY": 110,
+      "status": "approved",
+      "downloadToken": "11d702cd9a2aac96020099061e2a6e9fb68af85149e22262",
+      "tokenExpiresAt": "2026-01-06T12:58:05.463Z",
+      "createdAt": "2025-12-30T12:56:51.107Z",
+      "approvedAt": "2025-12-30T12:58:05.463Z",
+      "receiptPath": null,
+      "receiptOriginalName": null
+    }
+  ]
+}

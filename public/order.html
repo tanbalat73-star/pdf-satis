@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sipariş Sorgu</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Sipariş Sorgu</h1>
+
+    <div class="box">
+      <form id="queryForm" class="form">
+        <input name="orderCode" placeholder="Sipariş Kodu (Örn: A1B2C3D4)" required />
+        <button type="submit">Sorgula</button>
+      </form>
+      <pre id="status" class="msg" style="white-space:pre-wrap;"></pre>
+    </div>
+
+    <div class="box" id="downloadsBox" style="display:none;">
+      <h2>İndirilebilir Dosyalar</h2>
+      <div id="downloads" class="list small"></div>
+      <div id="expires" class="muted"></div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

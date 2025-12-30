@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PDF Kataloğu</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <a class="back" href="/">← Anasayfa</a>
+    <h1>PDF Kataloğu</h1>
+
+    <div id="sellerBox" class="box"></div>
+
+    <h2>PDF Listesi</h2>
+    <div id="products" class="list"></div>
+
+    <div class="box">
+      <h2>Sepet</h2>
+      <div id="cart" class="list small"></div>
+      <div class="row">
+        <b>Toplam:</b> <span id="total">0</span> TL
+      </div>
+    </div>
+
+    <div class="box">
+      <h2>Havale Bildirimi</h2>
+      <form id="orderForm" class="form">
+        <input name="fullName" placeholder="Ad Soyad" required />
+        <input name="email" type="email" placeholder="E-posta" required />
+        <input name="phone" placeholder="Telefon" required />
+        <input name="transferRef" placeholder="Açıklama (opsiyonel)" />
+        <button type="submit">Seçtiklerim İçin Havale Bildir</button>
+      </form>
+      <div id="orderMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
