@@ -65,12 +65,12 @@ for (const p of [PUBLIC_DIR, FILES_DIR, UPLOADS_DIR, RECEIPTS_DIR]) {
 // Config (Seller + Admin Auth)
 // -----------------------------
 const SELLER = {
-  iban: process.env.SELLER_IBAN || "TR00 0000 0000 0000 0000 0000 00",
-  accountName: process.env.SELLER_NAME || "Beyin Takımı Yayınları",
+  iban: process.env.SELLER_IBAN || "TR38 0006 2000 4540 0006 8919 45",
+  accountName: process.env.SELLER_NAME || "Cumali Ömeroğlu ",
 };
 
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASS = process.env.ADMIN_PASS || "1234";
+const ADMIN_PASS = process.env.ADMIN_PASS || "1234567890";
 
 // -----------------------------
 // Basic middlewares
