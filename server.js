@@ -12,6 +12,8 @@
 // ✅ /api/admin/approve           (sipariş onayla + token süresi + mail opsiyonel)
 // ✅ /api/admin/receipt/:orderCode (dekont görüntüle)
 //
+// EK: Keep-alive (Render Free sleep azaltma) + /health
+//
 // NOTLAR:
 // 1) package.json "type":"module" olduğu için import kullanır.
 // 2) Mail (opsiyonel): npm i nodemailer
@@ -34,7 +36,6 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -44,15 +45,12 @@ const PORT = process.env.PORT || 3001;
 const PUBLIC_DIR = path.join(__dirname, "public");
 
 // ✅ Kalıcı disk kökü (Render'da /var/data kullanacağız)
-const DATA_DIR = process.env.DATA_DIR
-  ? path.resolve(process.env.DATA_DIR)
-  : __dirname;
+const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : __dirname;
 
 const FILES_DIR = path.join(DATA_DIR, "files");
 const UPLOADS_DIR = path.join(DATA_DIR, "uploads");
 const RECEIPTS_DIR = path.join(DATA_DIR, "receipts");
 const DB_PATH = path.join(DATA_DIR, "db.json");
-
 
 // -----------------------------
 // Ensure folders
@@ -181,6 +179,17 @@ const receiptUpload = multer({
     "image/heic",
     "image/heif",
   ]),
+});
+
+// -----------------------------
+// Health (Render/monitoring)
+// -----------------------------
+app.get("/health", (req, res) => {
+  res.json({
+    ok: true,
+    time: nowISO(),
+    service: "pdf-satis",
+  });
 });
 
 // -----------------------------
@@ -526,7 +535,49 @@ app.use((err, req, res, next) => {
   return res.status(400).json({ error: err.message || "Hata oluştu" });
 });
 
+// -----------------------------
+// Keep-alive (Render Free sleep azaltma)
+// -----------------------------
+function getSelfUrlForKeepAlive() {
+  // Render bazen RENDER_EXTERNAL_URL verir (varsa en iyisi)
+  const renderUrl = process.env.RENDER_EXTERNAL_URL;
+  if (renderUrl) return renderUrl.replace(/\/+$/, "");
+
+  // Yoksa PUBLIC_BASE_URL kullan
+  const pub = process.env.PUBLIC_BASE_URL;
+  if (pub) return pub.replace(/\/+$/, "");
+
+  return null;
+}
+
+async function keepAlivePing(url) {
+  try {
+    // /health ping daha temiz
+    const res = await fetch(`${url}/health`, { method: "GET" });
+    // 200 olmasa bile servis uyanır; log için yazalım
+    console.log(`🔁 keep-alive ping: ${url}/health -> ${res.status}`);
+  } catch (e) {
+    // Render uyanma anında hata olabilir, sorun değil
+    console.log(`🔁 keep-alive ping failed: ${e?.message || "unknown"}`);
+  }
+}
+
 app.listen(PORT, () => {
-  console.log(`✅ Server running: http://localhost:${PORT}`);
-  console.log(`✅ Admin: http://localhost:${PORT}/admin (Basic Auth)`);
+  console.log(`✅ Server running on PORT: ${PORT}`);
+  console.log(`✅ Public root served from: ${PUBLIC_DIR}`);
+  console.log(`✅ Data dir: ${DATA_DIR}`);
+  console.log(`✅ Admin: /admin (Basic Auth)`);
+
+  // Keep-alive başlat
+  const selfUrl = getSelfUrlForKeepAlive();
+  if (selfUrl) {
+    // İlk ping: 30 sn sonra
+    setTimeout(() => keepAlivePing(selfUrl), 30 * 1000);
+
+    // Sonra 9 dakikada bir (Render sleep'e düşmesin diye)
+    setInterval(() => keepAlivePing(selfUrl), 9 * 60 * 1000);
+    console.log(`✅ Keep-alive enabled for: ${selfUrl}`);
+  } else {
+    console.log("ℹ️ Keep-alive disabled (RENDER_EXTERNAL_URL veya PUBLIC_BASE_URL yok)");
+  }
 });
